@@ -31,9 +31,19 @@ d3.json(url).then(function(data) {
         for (let i = 0; i < data.names.length; i++) {
             name = data.names[i]
             dropdownMenu.append("option")
+            .property("value", name)
             .text(name)    
-            .property("value",name)
+            
         }
+        
+        // Show the first metadata using id sample-metadata
+        let demoInfo = d3.select("#sample-metadata").html("");
+        let metadata = data.metadata;
+        
+        Object.entries(metadata[0]).forEach(function([key, value]){
+            demoInfo.append("p")
+            .text(`${key}: ${value}`)
+        });
         
     }
     init();
