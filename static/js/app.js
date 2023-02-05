@@ -27,9 +27,14 @@ d3.json(url).then(function(data) {
         // Choose drop down menu
         let dropdownMenu = d3.select("#selDataset")
         
-        dropdownMenu.append(option)
-        .text(data.name)
-        .property("value", data.name)
+        // Add all names to drop down menu
+        for (let i = 0; i < data.names.length; i++) {
+            name = data.names[i]
+            dropdownMenu.append("option")
+            .text(name)    
+            .property("value",name)
+        }
         
     }
+    init();
 });
