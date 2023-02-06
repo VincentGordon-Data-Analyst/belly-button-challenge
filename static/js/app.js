@@ -51,40 +51,24 @@ function init() {
     d3.json(url).then(function (data) {
         // build the initial bar chart for 940
         let samples = data.samples
+        let currentSample = samples[0];
 
-        // Filter for sample
-        sampleData = samples.filter(item => item.id == 940)
-
-        // First sample 
-        let firstSample = sampleData[0]
-        
-        let x = firstSample.sample_values;
-        let y = firstSample.otu_ids;
-        let labels = firstSample.otu_labels;
-
-        
-        // let sortedBySampleValues = values.sort((a, b) => b.sample_values - a.sample_values);
-        // slicedData = sortedBySampleValues.slice(0, 10);
-
-        // reversedData = slicedData.reverse();
+        let sample_values = currentSample.sample_values;
+        let otu_ids = currentSample.otu_ids;
+        let otu_labels = currentSample.otu_labels;
 
         let trace1 = {
-            x: x.slice(0, 10).reverse(),
-            y: y.slice(0,10).reverse(),
-            labels: labels,
+            x: sample_values.slice(0, 10).reverse(),
+            y: otu_ids.slice(0,10).map(id => `OTU ${id}`).reverse(),
+            labels: otu_labels.slice(0, 10).reverse(),
             type: "bar", 
             orientation: "h"
         };
 
-        let tracedData = [trace1];
-
-        
+        let tracedData = [trace1];        
 
         Plotly.newPlot("bar", tracedData);
     })
-   
-   
-
     
 }
 init();
