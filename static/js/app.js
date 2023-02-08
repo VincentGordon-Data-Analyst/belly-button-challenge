@@ -65,10 +65,75 @@ function init() {
             orientation: "h"
         };
 
-        let tracedData = [trace1];        
+        let tracedBar = [trace1];        
+        Plotly.newPlot("bar", tracedBar);
 
-        Plotly.newPlot("bar", tracedData);
-    })
+    }); 
+    
+    d3.json(url).then(function (data) {
+        let metadata = data.metadata;
+
+         // Build the initial gauge chart for 940
+         let trace2 = {
+            domain: {x: [0, 1], y: [0, 1]},
+            value: metadata[0].wfreq,
+            title: {text: "Belly Button Washing Frequency: Scrubs per Week"},
+            type: "indicator",
+            mode: "gauge+number",
+            gauge: {
+                axis: {range: [0, 10], tickmode: "linear", dticks: 10, dtick: 1, },
+                steps: [
+                    {range: [0, 1], color: "rgb(179, 255, 102)"},
+                    {range: [1, 2], color: "rgb(156, 255, 77)"},
+                    {range: [2, 3], color: "rgb(143, 255, 51)"},
+                    {range: [3, 4], color: "rgb(130, 255, 26)"},
+                    {range: [4, 5], color: "rgb(118, 255, 0)"},
+                    {range: [5, 6], color: "rgb(105, 230, 0)"},
+                    {range: [6, 7], color: "rgb(99, 204, 0)"},
+                    {range: [7, 8], color: "rgb(79, 179, 0)"},
+                    {range: [8, 9], color: "rgb(67, 153, 0)"},
+                    {range: [9, 10], color: "rgb(53, 123, 0)"}
+                ],
+            },
+            
+        }
+        let tracedGauge = [trace2];
+
+        let layout = {width: 600, height: 500, margin: {t: 0, b: 0}};
+        Plotly.newPlot("gauge", tracedGauge, layout);
+    });
+
+    // build bubble chart
+    d3.json(url).then(function (data) {
+        let currentSample = data.samples[0];
+        
+        let otu_ids = currentSample.otu_ids;
+        let sample_values = currentSample.sample_values;
+        let otu_labels = currentSample.otu_labels;
+
+        var trace3 = {
+            x: otu_ids,
+            y: sample_values,
+            mode: 'markers',
+            text: otu_labels,
+            marker: {
+              color: otu_ids,
+              size: sample_values
+            }
+          };
+          
+          var tracedBubble = [trace3];
+          
+          var layout = {
+            title: 'Marker Size',
+            showlegend: false,
+            height: 600,
+            width: 1200
+          };
+          
+          Plotly.newPlot('bubble', tracedBubble, layout);
+    });
+
     
 }
 init();
