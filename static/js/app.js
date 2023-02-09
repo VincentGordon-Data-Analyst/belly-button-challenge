@@ -27,56 +27,84 @@ d3.json(url).then(function(data) {
 function init() {
     // Choose drop down menu
     let dropdownMenu = d3.select("#selDataset")
-
     d3.json(url).then(function(data){
         // Add all names to drop down menu
+        let names = data.names; 
+
         for (let i = 0; i < data.names.length; i++) {
-        name = data.names[i]
+        let name = data.names[i]
+
         dropdownMenu.append("option")
         .property("value", name)
         .text(name)
         }
         
-        // Show the first metadata using id sample-metadata
-        let demoInfo = d3.select("#sample-metadata").html("");
-        let metadata = data.metadata;
         
-        // Add first metadata to demographic info section using key/value pairs
-        Object.entries(metadata[0]).forEach(function([key, value]){
+        let firstSample = names[0];
+
+
+        buildMetadata(firstSample)
+        buildCharts(firstSample)
+        optionChanged(firstSample)
+    });
+}
+// Build metadata function to display demographic information
+
+function buildMetadata(sample) {
+    d3.json(url).then(function(data) {
+        let metadata = data.metadata;
+
+        let currentSample = metadata.filter(item => item.id == sample)
+        
+        console.log(currentSample)
+        
+        // Show the metadata using id sample-metadata
+        let demoInfo = d3.select("#sample-metadata").html("");
+        
+        // Add metadata to demographic info section using key/value pairs
+        Object.entries(currentSample[0]).forEach(function([key, value]){
             demoInfo.append("p")
             .text(`${key}: ${value}`)
         });
     });
 
-    d3.json(url).then(function (data) {
-        // build the initial bar chart for 940
-        let samples = data.samples
-        let currentSample = samples[0];
+}
 
-        let sample_values = currentSample.sample_values;
-        let otu_ids = currentSample.otu_ids;
-        let otu_labels = currentSample.otu_labels;
+function buildCharts(sample) {
+    d3.json(url).then(function(data){
+        // Build bubble bar chart
+        let samples = data.samples;
+        let currentSampleInfo = samples.filter(item => item.id == sample);
+        
+        let currentData = currentSampleInfo[0];
+
+        let sample_values = currentData.sample_values;
+        let otu_ids = currentData.otu_ids;
+        let otu_labels = currentData.otu_labels;
 
         let trace1 = {
             x: sample_values.slice(0, 10).reverse(),
-            y: otu_ids.slice(0,10).map(id => `OTU ${id}`).reverse(),
+            y: otu_ids.slice(0, 10).map(id => `OTU ${id}`).reverse(),
             labels: otu_labels.slice(0, 10).reverse(),
-            type: "bar", 
+            type: "bar",
             orientation: "h"
+
         };
 
-        let tracedBar = [trace1];        
-        Plotly.newPlot("bar", tracedBar);
+        let tracedBar = [trace1];  
+        
+        Plotly.newPlot("bar", tracedBar);  
+    });
 
-    }); 
-    
     d3.json(url).then(function (data) {
         let metadata = data.metadata;
+        let currentSampleInfo = metadata.filter(item => item.id == sample);
+        let currentData = currentSampleInfo[0];
 
          // Build the initial gauge chart for 940
          let trace2 = {
             domain: {x: [0, 1], y: [0, 1]},
-            value: metadata[0].wfreq,
+            value: currentData.wfreq,
             title: {text: "Belly Button Washing Frequency: Scrubs per Week"},
             type: "indicator",
             mode: "gauge+number",
@@ -102,14 +130,17 @@ function init() {
         let layout = {width: 600, height: 500, margin: {t: 0, b: 0}};
         Plotly.newPlot("gauge", tracedGauge, layout);
     });
-
     // build bubble chart
     d3.json(url).then(function (data) {
-        let currentSample = data.samples[0];
+        let samples = data.samples; 
+
+        let currentSampleInfo = samples.filter(item => item.id == sample);
+        let currentData = currentSampleInfo[0];
         
-        let otu_ids = currentSample.otu_ids;
-        let sample_values = currentSample.sample_values;
-        let otu_labels = currentSample.otu_labels;
+        
+        let otu_ids = currentData.otu_ids;
+        let sample_values = currentData.sample_values;
+        let otu_labels = currentData.otu_labels;
 
         var trace3 = {
             x: otu_ids,
@@ -125,15 +156,19 @@ function init() {
           var tracedBubble = [trace3];
           
           var layout = {
-            title: 'Marker Size',
             showlegend: false,
             height: 600,
-            width: 1200
+            width: 1100
           };
           
           Plotly.newPlot('bubble', tracedBubble, layout);
     });
-
     
 }
+
+function optionChanged(newData) {
+    buildCharts(newData);
+    buildMetadata(newData);
+}
+
 init();
